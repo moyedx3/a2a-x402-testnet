@@ -107,51 +107,9 @@ This architecture ensures that the agent's orchestration logic remains completel
 ## Architecture Overview
 
 ### System Workflow
+<img width="3223" height="3840" alt="Complex Model K with soc2 _ Mermaid Chart-2025-09-18-185105" src="https://github.com/user-attachments/assets/47a782b6-bec9-4ccb-ac0b-260812658eb9" />
 
-```mermaid
-graph TB
-    subgraph "Client Side"
-        A[Web UI<br/>localhost:8000] --> B[ClientAgent<br/>client_agent.py]
-        B --> C[MockLocalWallet<br/>wallet.py]
-        C --> D[Sign Payment]
-    end
-    
-    subgraph "Server Side"
-        E[Merchant Server<br/>localhost:10000] --> F[routes.py]
-        F --> G[x402MerchantExecutor<br/>x402_merchant_executor.py]
-        G --> H[ADKAgentExecutor<br/>_adk_agent_executor.py]
-        H --> I[AdkMerchantAgent<br/>adk_merchant_agent.py]
-    end
-    
-    subgraph "Payment Processing"
-        J[MockFacilitator<br/>mock_facilitator.py] 
-        K[Real Facilitator<br/>x402.org]
-    end
-    
-    subgraph "External Services"
-        L[Google Gemini API]
-        M[Base Sepolia Testnet]
-    end
-    
-    B -->|HTTP Request| E
-    E -->|Payment Required| B
-    B -->|Signed Payment| E
-    G -->|Verify/Settle| J
-    G -->|Verify/Settle| K
-    K -->|Blockchain TX| M
-    I -->|LLM Calls| L
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style E fill:#e8f5e8
-    style F fill:#f3e5f5
-    style G fill:#fff3e0
-    style H fill:#f3e5f5
-    style I fill:#e1f5fe
-    style J fill:#ffebee
-    style K fill:#ffebee
-```
+
 
 ### File Structure & Responsibilities
 
@@ -221,17 +179,6 @@ graph TB
   - No real blockchain interaction
   - Perfect for development and testing
 - **Dependencies**: `x402_a2a` library
-
-#### **Configuration Files**
-
-**`.env`**
-- **Role**: Environment configuration
-- **Key Variables**:
-  - `GOOGLE_API_KEY`: Required for Gemini API
-  - `USE_MOCK_FACILITATOR`: Toggle between mock/real facilitator
-  - `CLIENT_PRIVATE_KEY`: Wallet private key for signing
-  - `MERCHANT_WALLET_ADDRESS`: Merchant's wallet address
-  - `GEMINI_MODEL`: LLM model selection
 
 ### Data Flow
 
