@@ -33,6 +33,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "a2a-sdk" },
+    { name = "cdp" },
     { name = "cdp-sdk" },
     { name = "click" },
     { name = "eth-account" },
@@ -47,6 +48,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "a2a-sdk" },
+    { name = "cdp", specifier = ">=0.0.2" },
     { name = "cdp-sdk", specifier = ">=1.20.0" },
     { name = "click", specifier = ">=8.2.0" },
     { name = "eth-account", specifier = ">=0.13.7" },
@@ -229,6 +231,15 @@ sdist = { url = "https://files.pythonhosted.org/packages/6c/81/3747dad6b14fa2cf5
 wheels = [
     { url = "https://files.pythonhosted.org/packages/72/76/20fa66124dbe6be5cafeb312ece67de6b61dd91a0247d1ea13db4ebb33c2/cachetools-5.5.2-py3-none-any.whl", hash = "sha256:d26a22bcc62eb95c3beabd9f1ee5e820d3d2704fe2967cbe350e20c8ffcd3f0a", size = 10080, upload-time = "2025-02-20T21:01:16.647Z" },
 ]
+
+[[package]]
+name = "cdp"
+version = "0.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "scandir" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1c/24/cd8d18af667e4c23a60d782100d836ea62f0a3aa8841b245aec824cad4dc/cdp-0.0.2.tar.gz", hash = "sha256:92fa51d74d12695ab744d9c5ebe00057110df5dc47d6405440933fd7a2f19526", size = 1981, upload-time = "2015-07-19T10:50:02.149Z" }
 
 [[package]]
 name = "cdp-sdk"
@@ -2210,6 +2221,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/da/8a/22b7beea3ee0d44b1
 wheels = [
     { url = "https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl", hash = "sha256:68635866661c6836b8d39430f97a996acbd61bfa49406748ea243539fe239762", size = 34696, upload-time = "2025-04-16T09:51:17.142Z" },
 ]
+
+[[package]]
+name = "scandir"
+version = "1.10.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/df/f5/9c052db7bd54d0cbf1bc0bb6554362bba1012d03e5888950a4f5c5dadc4e/scandir-1.10.0.tar.gz", hash = "sha256:4d4631f6062e658e9007ab3149a9b914f3548cb38bfb021c64f39a025ce578ae", size = 33311, upload-time = "2019-03-09T17:58:33.269Z" }
 
 [[package]]
 name = "sentry-sdk"

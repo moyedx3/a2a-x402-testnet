@@ -42,11 +42,12 @@ class AdkMerchantAgent(BaseAgent):
         self.x402 = x402Utils()
 
     def _get_product_price(self, product_name: str) -> str:
-        """Generates a deterministic price for a product."""
+        """Generates a deterministic price for a product (1-10 cents for testing)."""
+        # Generate price between $0.01 and $0.10 (1 to 10 cents in atomic units)
         price = (
             int(hashlib.sha256(product_name.lower().encode()).hexdigest(), 16)
-            % 99900001
-            + 100000
+            % 10   # 0-9 cents
+            + 1    # 1-10 cents ($0.01 to $0.10)
         )
         return str(price)
 
@@ -109,7 +110,7 @@ class AdkMerchantAgent(BaseAgent):
     def create_agent(self) -> LlmAgent:
         """Creates the LlmAgent instance for the merchant."""
         return LlmAgent(
-            model="gemini-2.5-flash",
+            model="gemini-1.5-flash",
             name="adk_merchant_agent",
             description="An agent that can sell any item by providing a price and then processing the payment using the x402 protocol.",
             instruction="""You are a helpful and friendly "Amazon" merchant agent.

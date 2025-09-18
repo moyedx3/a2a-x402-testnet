@@ -42,7 +42,8 @@ class MockLocalWallet(Wallet):
         """
         Signs a payment requirement using x402.exact EIP-3009 signing.
         """
-        private_key = "0x0000000000000000000000000000000000000000000000000000000000000001"
+        import os
+        private_key = os.getenv("CLIENT_PRIVATE_KEY", "0x0000000000000000000000000000000000000000000000000000000000000001")
         account = eth_account.Account.from_key(private_key)
         
         return process_payment_required(requirements, account)

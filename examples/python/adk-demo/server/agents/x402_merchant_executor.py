@@ -47,17 +47,24 @@ class x402MerchantExecutor(x402ServerExecutor):
     facilitator to verify and settle payments for the merchant.
     """
 
-    def __init__(
-        self, delegate: AgentExecutor, facilitator_config: FacilitatorConfig = None
-    ):
+    def __init__(self, delegate: AgentExecutor, facilitator_config: FacilitatorConfig = None):
         super().__init__(delegate, x402ExtensionConfig())
-
+        
         use_mock = os.getenv("USE_MOCK_FACILITATOR", "true").lower() == "true"
         if use_mock:
             print("--- Using Mock Facilitator ---")
             self._facilitator = MockFacilitator()
         else:
             print("--- Using REAL Facilitator ---")
+            if os.getenv("USE_MAINNET", "false").lower() == "false":
+                from x402.facilitator import FacilitatorConfig
+                facilitator_config = FacilitatorConfig(url="https://x402.org/facilitator")
+            else:
+                from cdp.x402 import create_facilitator_config
+                facilitator_config = create_facilitator_config(
+                    api_key_id=os.getenv("CDP_API_KEY_ID"),
+                    api_key_secret=os.getenv("CDP_API_KEY_SECRET"),
+                )
             self._facilitator = FacilitatorClient(facilitator_config)
 
     @override

@@ -72,7 +72,7 @@ class ClientAgent:
     def create_agent(self) -> Agent:
         """Creates the ADK Agent instance."""
         return Agent(
-            model="gemini-2.5-flash",
+            model="gemini-1.5-flash",
             name="client_agent",
             instruction=self.root_instruction,
             before_agent_callback=self.before_agent_callback,
