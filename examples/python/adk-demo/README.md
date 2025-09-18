@@ -104,6 +104,148 @@ In the demo, we inject a `MockLocalWallet` which signs transactions using a priv
 
 This architecture ensures that the agent's orchestration logic remains completely separate from the specifics of payment signing.
 
+## Architecture Overview
+
+### System Workflow
+
+```mermaid
+graph TB
+    subgraph "Client Side"
+        A[Web UI<br/>localhost:8000] --> B[ClientAgent<br/>client_agent.py]
+        B --> C[MockLocalWallet<br/>wallet.py]
+        C --> D[Sign Payment]
+    end
+    
+    subgraph "Server Side"
+        E[Merchant Server<br/>localhost:10000] --> F[routes.py]
+        F --> G[x402MerchantExecutor<br/>x402_merchant_executor.py]
+        G --> H[ADKAgentExecutor<br/>_adk_agent_executor.py]
+        H --> I[AdkMerchantAgent<br/>adk_merchant_agent.py]
+    end
+    
+    subgraph "Payment Processing"
+        J[MockFacilitator<br/>mock_facilitator.py] 
+        K[Real Facilitator<br/>x402.org]
+    end
+    
+    subgraph "External Services"
+        L[Google Gemini API]
+        M[Base Sepolia Testnet]
+    end
+    
+    B -->|HTTP Request| E
+    E -->|Payment Required| B
+    B -->|Signed Payment| E
+    G -->|Verify/Settle| J
+    G -->|Verify/Settle| K
+    K -->|Blockchain TX| M
+    I -->|LLM Calls| L
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#fff3e0
+    style E fill:#e8f5e8
+    style F fill:#f3e5f5
+    style G fill:#fff3e0
+    style H fill:#f3e5f5
+    style I fill:#e1f5fe
+    style J fill:#ffebee
+    style K fill:#ffebee
+```
+
+### File Structure & Responsibilities
+
+#### **Client Side Files**
+
+**`client_agent/client_agent.py`**
+- **Role**: Main orchestrator that handles user interactions
+- **Key Features**:
+  - Manages conversation flow with the merchant
+  - Handles payment confirmation prompts
+  - Delegates payment signing to wallet
+  - Constructs and sends payment responses
+- **Dependencies**: `wallet.py`, `x402_a2a` library
+
+**`client_agent/wallet.py`**
+- **Role**: Payment signing interface
+- **Key Features**:
+  - Implements `Wallet` interface for pluggable signing
+  - Signs payment requirements using private key
+  - Supports environment variable configuration
+  - Can be replaced with MetaMask, hardware wallets, etc.
+- **Dependencies**: `eth_account`, `x402_a2a` library
+
+#### **Server Side Files**
+
+**`server/agents/routes.py`**
+- **Role**: HTTP routing and agent orchestration
+- **Key Features**:
+  - Creates HTTP routes for each agent
+  - Wraps agents with appropriate executors
+  - Handles A2A protocol communication
+  - Manages session and memory services
+- **Dependencies**: All agent files, `x402MerchantExecutor`
+
+**`server/agents/x402_merchant_executor.py`**
+- **Role**: Payment protocol middleware
+- **Key Features**:
+  - Intercepts `x402PaymentRequiredException`
+  - Handles payment verification and settlement
+  - Manages facilitator selection (mock vs real)
+  - Centralizes payment configuration logic
+- **Dependencies**: `x402_a2a` library, facilitator implementations
+
+**`server/agents/_adk_agent_executor.py`**
+- **Role**: ADK agent execution wrapper
+- **Key Features**:
+  - Executes the actual LLM agent
+  - Handles streaming responses
+  - Manages agent lifecycle
+  - Provides debugging and logging
+- **Dependencies**: Google ADK, `AdkMerchantAgent`
+
+**`server/agents/adk_merchant_agent.py`**
+- **Role**: Core business logic for merchant
+- **Key Features**:
+  - Defines product catalog and pricing
+  - Implements merchant conversation logic
+  - Raises payment exceptions when needed
+  - Configurable via environment variables
+- **Dependencies**: Google ADK, `x402_a2a` library
+
+**`server/agents/mock_facilitator.py`**
+- **Role**: Mock payment facilitator for testing
+- **Key Features**:
+  - Approves all valid payment requests
+  - Returns mock settlement responses
+  - No real blockchain interaction
+  - Perfect for development and testing
+- **Dependencies**: `x402_a2a` library
+
+#### **Configuration Files**
+
+**`.env`**
+- **Role**: Environment configuration
+- **Key Variables**:
+  - `GOOGLE_API_KEY`: Required for Gemini API
+  - `USE_MOCK_FACILITATOR`: Toggle between mock/real facilitator
+  - `CLIENT_PRIVATE_KEY`: Wallet private key for signing
+  - `MERCHANT_WALLET_ADDRESS`: Merchant's wallet address
+  - `GEMINI_MODEL`: LLM model selection
+
+### Data Flow
+
+1. **User Request**: User types message in web UI
+2. **Client Processing**: `ClientAgent` processes request and sends to merchant
+3. **Merchant Response**: `AdkMerchantAgent` generates response, may raise payment exception
+4. **Payment Handling**: `x402MerchantExecutor` catches exception, creates payment request
+5. **User Confirmation**: Client prompts user for payment confirmation
+6. **Payment Signing**: `MockLocalWallet` signs payment with private key
+7. **Payment Submission**: Client sends signed payment back to merchant
+8. **Verification**: `x402MerchantExecutor` verifies payment with facilitator
+9. **Settlement**: Facilitator settles payment (mock or real blockchain)
+10. **Response**: Merchant sends final confirmation to client
+
 ## Recent Updates
 
 This demo has been enhanced with the following improvements:
