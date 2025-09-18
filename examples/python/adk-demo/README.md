@@ -114,3 +114,47 @@ This demo has been enhanced with the following improvements:
 - **Testnet/Mainnet Support**: Easy switching between testnet and mainnet
 - **Improved Architecture**: Cleaner separation of facilitator configuration logic
 - **Testing-Friendly Pricing**: Reduced product prices for easier testing with limited funds
+
+## Expected Output
+
+When the demo runs successfully, you'll see different responses depending on your facilitator configuration:
+
+### Mock Facilitator (USE_MOCK_FACILITATOR=true)
+When using the mock facilitator, you'll see a successful settlement with mock data:
+
+```
+✅ Payment Settled!
+INFO:x402_a2a.executors.server:Settlement response: {
+  "success": true,
+  "error_reason": null,
+  "transaction": null,
+  "network": "mock-network",
+  "payer": null
+}
+```
+
+### Real Testnet Facilitator (USE_MOCK_FACILITATOR=false)
+When using the real facilitator on testnet, you'll see actual blockchain transaction details:
+
+```
+✅ Payment Settled!
+INFO:x402_a2a.executors.server:Settlement response: {
+  "success": true,
+  "error_reason": null,
+  "transaction": "YOUR_TRANSACTION_HASH",
+  "network": "base-sepolia",
+  "payer": "YOUR_WALLET_ADDRESS"
+}
+```
+
+### What This Means
+- **Mock Mode**: Perfect for testing the payment flow without real transactions
+- **Testnet Mode**: Real blockchain transactions on Base Sepolia testnet
+- **Transaction Hash**: You can verify the transaction on [Base Sepolia Explorer](https://sepolia.basescan.org/)
+- **Payer Address**: The wallet address that signed the payment
+
+### Troubleshooting
+If you see `⛔ Payment failed verification` with `"insufficient_funds"`, check:
+1. Your wallet has enough testnet USDC
+2. The product price is within your balance
+3. You're using the correct private key for you wallet address in `CLIENT_PRIVATE_KEY`
