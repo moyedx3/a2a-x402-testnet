@@ -14,6 +14,7 @@ The reusable, core logic for the x402 protocol is encapsulated in the `x402_a2a`
 - Python 3.13+
 - `uv` (for environment and package management)
 - Google API key (you can create one [here](https://ai.google.dev/gemini-api/docs/api-key))
+- **For real payments**: CDP API credentials (optional, see Configuration section)
 
 ### 1. Setup the Environment
 First, sync the virtual environment to install all necessary dependencies, including the local `x402_a2a` library in editable mode.
@@ -23,24 +24,32 @@ Run this command from the root of the `a2a-x402` repository:
 uv sync --directory=examples/python/adk-demo
 ```
 
-Set your Google API key as an environment variable:
+### 2. Configuration
+Create a `.env` file in the `examples/python/adk-demo/` directory with the following variables:
 
-> **Warning:** Do not hardcode or commit your API key. The commands below set the variable for the current session only. For persistence, add the command to your shell's startup file (e.g., `~/.bashrc`, `~/.zshrc`).
+```bash
+# Required
+GOOGLE_API_KEY=your_api_key_here
 
-*   **Linux/macOS:**
-    ```bash
-    export GOOGLE_API_KEY="your_api_key_here"
-    ```
-*   **Windows (Command Prompt):**
-    ```cmd
-    set GOOGLE_API_KEY=your_api_key_here
-    ```
-*   **Windows (PowerShell):**
-    ```powershell
-    $env:GOOGLE_API_KEY="your_api_key_here"
-    ```
+# Optional - Model Configuration
+GEMINI_MODEL=gemini-1.5-flash  # Default: gemini-1.5-flash
 
-### 2. Start the Merchant Agent Server
+# Optional - Facilitator Configuration
+USE_MOCK_FACILITATOR=false     # Default: true (uses mock facilitator)
+USE_MAINNET=false              # Default: false (uses testnet)
+
+# Optional - For Real Payments (when USE_MOCK_FACILITATOR=false)
+CDP_API_KEY_ID=your_cdp_key_id
+CDP_API_KEY_SECRET=your_cdp_secret
+
+# Optional - Wallet Configuration
+CLIENT_PRIVATE_KEY=your_private_key_here
+MERCHANT_WALLET_ADDRESS=your_merchant_wallet_address
+```
+
+> **Warning:** Do not hardcode or commit your API keys. The `.env` file is already included in `.gitignore`.
+
+### 3. Start the Merchant Agent Server
 The merchant server hosts the agent that sells products.
 
 Run this command from the root of the `a2a-x402` repository:
@@ -49,7 +58,7 @@ uv --directory=examples/python/adk-demo run server
 ```
 You should see logs indicating the server is running, typically on `localhost:10000`.
 
-### 3. Start the Client Agent & Web UI
+### 4. Start the Client Agent & Web UI
 The client agent is an orchestrator that communicates with the merchant. The ADK provides a web interface to interact with it.
 
 Run this command from the root of the `a2a-x402` repository:
@@ -88,9 +97,20 @@ To use a real payment processor, set `USE_MOCK_FACILITATOR=false` and provide a 
 ### Wallet
 The `ClientAgent` does not handle signing directly. Instead, it depends on a `Wallet` interface (`wallet.py`). This makes the signing mechanism fully pluggable.
 
-In the demo, we inject a `MockLocalWallet` which signs transactions using a hardcoded private key. To connect to a real system, a developer could implement:
+In the demo, we inject a `MockLocalWallet` which signs transactions using a private key from the `CLIENT_PRIVATE_KEY` environment variable. To connect to a real system, a developer could implement:
 - A wallet that connects to a browser extension like MetaMask.
 - A wallet that calls out to a secure MPC (Multi-Party Computation) service.
 - A wallet that communicates with a hardware signing device.
 
 This architecture ensures that the agent's orchestration logic remains completely separate from the specifics of payment signing.
+
+## Recent Updates
+
+This demo has been enhanced with the following improvements:
+
+- **Real Facilitator Integration**: Support for both mock and real x402 facilitators
+- **Environment Variable Configuration**: All settings configurable via `.env` file
+- **Model Flexibility**: Configurable Gemini model selection (defaults to gemini-1.5-flash)
+- **Testnet/Mainnet Support**: Easy switching between testnet and mainnet
+- **Improved Architecture**: Cleaner separation of facilitator configuration logic
+- **Testing-Friendly Pricing**: Reduced product prices for easier testing with limited funds
